@@ -5,7 +5,7 @@ pipeline {
         stage('Example Stage 1') {
             steps {
                 parallel(
-                        "step 1": { echo "hello" },
+                        "step 1": { sleep 5 && echo "hello" },
                         "step 2": { echo "world" },
                         "step 3": { echo "world" }
                 )
@@ -15,7 +15,7 @@ pipeline {
             steps {
                 parallel(
                         "step 1": { echo "hello" },
-                        "step 2": { echo "world" },
+                        "step 2": { sleep 10 && echo "world" },
                         "step 3": { echo "world" }
                 )
             }
