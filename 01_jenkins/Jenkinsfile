@@ -7,15 +7,29 @@ pipeline {
                 echo 'Building..'
             }
         }
-        stage('Test') {
-            parallel([
-                hello: {
-                    echo "hello"
-                },
-                world: {
-                    echo "world"
+        parallel linux: {
+            node('linux') {
+                checkout scm
+                try {
+                    unstash 'app'
+                    sh 'echo check'
                 }
-            ])
+                finally {
+                    junit '**/target/*.xml'
+                }
+            }
+        },
+        windows: {
+            node('windows') {
+                checkout scm
+                try {
+                    unstash 'app'
+                    sh 'echo check'
+                }
+                finally {
+                    junit '**/target/*.xml'
+                }
+            }
         }
         stage('Deploy') {
             steps {
