@@ -2,38 +2,22 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Example Stage 1') {
             steps {
-                echo 'Building..'
+                parallel(
+                        "step 1": { echo "hello" },
+                        "step 2": { echo "world" },
+                        "step 3": { echo "world" }
+                )
             }
         }
-        parallel linux: {
-            node('linux') {
-                checkout scm
-                try {
-                    unstash 'app'
-                    sh 'echo check'
-                }
-                finally {
-                    junit '**/target/*.xml'
-                }
-            }
-        },
-        windows: {
-            node('windows') {
-                checkout scm
-                try {
-                    unstash 'app'
-                    sh 'echo check'
-                }
-                finally {
-                    junit '**/target/*.xml'
-                }
-            }
-        }
-        stage('Deploy') {
+        stage('Example Stage 2') {
             steps {
-                echo 'Deploying....'
+                parallel(
+                        "step 1": { echo "hello" },
+                        "step 2": { echo "world" },
+                        "step 3": { echo "world" }
+                )
             }
         }
     }
