@@ -32,9 +32,8 @@ pipeline {
             }
         } 
         stage('Tests (Unit)') {
-            steps {
-                parallel parallelStagesMap
-            }
+            parallel parallelStagesMap
+            
         }
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
