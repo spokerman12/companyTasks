@@ -6,7 +6,7 @@ pipeline {
             steps {
                 parallel(
                         "step 1": { echo "hello" },
-                        "step 2": { echo "world" },
+                        "step 2": { sleep(time:10,unit:"SECONDS") },
                         "step 3": { echo "world" }
                 )
             }
