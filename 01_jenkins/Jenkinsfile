@@ -7,9 +7,9 @@ pipeline {
                 parallel(
                         "step 1": { echo "hello" },
                         "step 2": { sleep(time:10,unit:"SECONDS") },
-                        "step 3": { echo "world" }
-                        "step 3": { echo "how" }
-                        "step 3": { echo "is" }
+                        "step 3": { echo "world" },
+                        "step 3": { echo "how" },
+                        "step 3": { echo "is" },
                         "step 3": { echo "life?" }
 
                 )
