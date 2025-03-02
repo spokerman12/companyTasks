@@ -1,31 +1,60 @@
-pipeline {
-    agent any
-
-    stages {
-        stage('Example Stage 1') {
-            steps {
-                parallel(
-                        "step 1": { echo "hello" },
-                        "step 2": { 
-                            sleep(time:10,unit:"SECONDS") 
-                            echo "ahh!"
-                        },
-                        "step 3": { echo "world" },
-                        "step 4": { echo "how" },
-                        "step 5": { echo "is" },
-                        "step 6": { echo "life?" }
-
-                )
-            }
-        }
-        stage('Example Stage 2') {
-            steps {
-                parallel(
-                        "step 1": { echo "hello" },
-                        "step 2": { echo "world" },
-                        "step 3": { echo "world" }
-                )
+def agents  = ['win64', 'linux64', 'macos']
+ 
+def generateStage(nodeLabel) {
+    return {
+        stage("Runs on ${nodeLabel}") {
+            node(nodeLabel) {
+               script {
+                    echo "Running on ${nodeLabel}"
+                    echo '************************'
+                    echo '*****BUILDING JOBS******'
+                    echo '************************'
+                    sh 'python build.py'
+                    sh 'cd ion-js && npm run prepublishOnly'
+                }
             }
         }
     }
 }
+def parallelStagesMap = agents.collectEntries {
+    ["${it}" : generateStage(it)]
+}
+
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
+                sh "ls -lart ./*"
+            }
+        } 
+        stage('Tests (Unit)') {
+            steps {
+                parallel parallelStagesMap
+            }
+        }
+        stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
+            steps {
+                bat "pytest -k test_unit_a" 
+            }
+        }
+        stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
+            steps {
+                bat "pytest -k test_unit_a" 
+            }
+        }
+    } // usa vault en algun momento
+}
+
+
+// (
+//                         "Test (unit, group A)": { 
+//                             bat "pytest -k test_unit_a" 
+//                         },
+//                         "Test (unit, group B)": { 
+//                             bat "pytest -k test_unit_b" 
+//                         }
+//                 )
