@@ -7,7 +7,7 @@ def generateStage(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
-                    sh "pytest -k test_unit --cov ./01_jenkins/sample_app --junitxml=pytest_unit_report_${nodeLabel}.html ./01_jenkins/sample_app || true"
+                    sh "pytest -k test_unit --cov ./01_jenkins/sample_app --junitxml=pytest_unit_report_${nodeLabel}.html ./01_jenkins/sample_app"
                 }
             }
         }
@@ -37,7 +37,7 @@ pipeline {
         }
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
-                sh "STAGING_URL=https://localhost:8080 pytest -k test_integration --junitxml=pytest_integration_report.html" 
+                sh "STAGING_URL=http://localhost:8080/login pytest -k test_integration --junitxml=pytest_integration_report.html" 
             }
         }
         stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
