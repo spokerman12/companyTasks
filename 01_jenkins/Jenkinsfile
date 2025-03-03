@@ -6,6 +6,7 @@ def generateStage(nodeLabel) {
             node(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
+                    sh "ls"
                     sh "pytest -k test_unit --cov ./sample_app --junitxml=pytest_integration_report_${nodeLabel}.html ./sample_app"
                 }
             }
