@@ -14,7 +14,7 @@ then
     export AWS_PROFILE=production
 fi
 
-# ...
-# Segun tantas cuentas haya
+# To-Do
+# Refactor, for each account...
 
 terraform workspace select $TF_VAR_environment

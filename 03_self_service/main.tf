@@ -1,5 +1,13 @@
 locals {
-  buckets = []
+  buckets = terraform.workspace == "staging" ? [
+    {
+      bucket_name = "bucket_staging"
+    },
+  ] : [
+    {
+      bucket_name = "bucket_production"
+    },
+  ]
 }
 
 provider "aws" {

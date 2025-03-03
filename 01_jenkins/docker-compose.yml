@@ -1,6 +1,7 @@
 services:
   jenkins:
-    # For your convenience, uncomment to use this image instead of building it
+    container_name: jenkins
+    # For your convenience, uncomment the following line to use this image instead of building it
     # image: danielefrancisz/jenkins-python3.12-awscli:latest
     build:
       dockerfile: ./Dockerfile
@@ -16,6 +17,7 @@ services:
     user: "${UID}:${GID}"
     
   vault:
+    container_name: vault
     image: hashicorp/vault:1.18
     network_mode: bridge
     ports:
@@ -31,6 +33,7 @@ services:
       - IPC_LOCK 
 
   vault-loader:
+    container_name: vault-loader
     image: alpine/curl
     network_mode: host
     depends_on:
@@ -41,15 +44,18 @@ services:
 
 
   localstack:
+    container_name: localstack
     image: localstack/localstack
     network_mode: bridge
     ports:
       - 127.0.0.1:4566:4566           
       - 127.0.0.1:4510-4559:4510-4559 
     environment:
-      - DEBUG=${DEBUG:-0}
-      - EXTENSION_AUTO_LOAD=localstack-extension-terraform-init
+      - DEBUG=1
+      - EXTENSION_AUTO_INSTALL=localstack-extension-terraform-init
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
     volumes:
-      - "./main.tf:/etc/localstack/init/ready.d/main.tf"
+      - ./main.tf:/etc/localstack/init/ready.d/main.tf:r
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
