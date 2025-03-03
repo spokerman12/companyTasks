@@ -6,11 +6,7 @@ def generateStage(nodeLabel) {
             node(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
-                    echo '************************'
-                    echo '*****BUILDING JOBS******'
-                    echo '************************'
-                    sh 'python build.py'
-                    sh 'cd ion-js && npm run prepublishOnly'
+                    sh "pytest -k test_unit --html=pytest_integration_report_${nodeLabel}.html"
                 }
             }
         }
@@ -40,12 +36,12 @@ pipeline {
         }
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
-                bat "pytest -k test_unit_a" 
+                bat "pytest -k test_integration --html=pytest_integration_report.html" 
             }
         }
         stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
-                bat "pytest -k test_unit_a" 
+                bat "ls -l" 
             }
         }
     } // usa vault en algun momento
