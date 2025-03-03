@@ -1,14 +1,6 @@
-
-# https://docs.docker.com/compose/install/linux/
-# docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 localstack/localstack
-# docker run --cap-add=IPC_LOCK -d --name=dev-vault hashicorp/vault
-
-
-# docker run -p 8080:8080 -p 50000:50000 --restart=on-failure -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk17
-
-
 services:
   jenkins:
+    # For your convenience, uncomment to use this image instead of building it
     # image: danielefrancisz/jenkins-python3.12-awscli:latest
     build:
       dockerfile: ./Dockerfile
@@ -23,7 +15,6 @@ services:
       - ./jenkins_home:/var/jenkins_home:rw
     user: "${UID}:${GID}"
     
-      
   vault:
     image: hashicorp/vault:1.18
     network_mode: bridge
@@ -31,6 +22,9 @@ services:
       - 8200:8200
     environment:
       # To-Do
+      # Better to use service tokens and not expose them in VCS. 
+      # This state is for
+      # development purposes only
       - VAULT_DEV_ROOT_TOKEN_ID=myroot
       - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
     cap_add:
@@ -50,10 +44,9 @@ services:
     image: localstack/localstack
     network_mode: bridge
     ports:
-      - 127.0.0.1:4566:4566            # LocalStack Gateway
-      - 127.0.0.1:4510-4559:4510-4559  # external services port range
+      - 127.0.0.1:4566:4566           
+      - 127.0.0.1:4510-4559:4510-4559 
     environment:
-      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
       - DEBUG=${DEBUG:-0}
       - EXTENSION_AUTO_LOAD=localstack-extension-terraform-init
     volumes:

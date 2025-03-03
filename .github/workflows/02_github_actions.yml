@@ -1,12 +1,12 @@
 name: hello-world
 on: push
 jobs:
-  my-job:
+  sample-job:
     runs-on: self-hosted
     steps:
       - name: Build
-        run: echo "Hello World!"
+        run: echo "This builds!"
       - name: Test
-        run: echo "Hello World!"
+        run: echo "This tests!"
       - name: Deploy
-        run: echo "Hello World!"
+        run: echo "This deploys!"
