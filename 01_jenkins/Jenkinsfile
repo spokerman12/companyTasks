@@ -32,7 +32,8 @@ pipeline {
         // To-Do
         stage('Load credentials') {
             steps {
-                sh 'curl http://localhost:8200/v1/secret/data/aws_credentials > aws_credentials.json'
+                // To-Do
+                sh 'curl http://localhost:8200/v1/secret/data/aws_credentials -H "X-Vault-Token: myroot" > aws_credentials.json'
                 script {
                     env.AWS_ACCESS_KEY = readJSON(text: "./aws_credentials.json").AWS_ACCESS_KEY
                     env.AWS_SECRET_ACCESS_KEY = readJSON(text: "./aws_credentials.json").AWS_SECRET_ACCESS_KEY
