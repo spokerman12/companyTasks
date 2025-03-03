@@ -2,7 +2,11 @@ name: hello-world
 on: push
 jobs:
   my-job:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: my-step
+      - name: Build
+        run: echo "Hello World!"
+      - name: Test
+        run: echo "Hello World!"
+      - name: Deploy
         run: echo "Hello World!"

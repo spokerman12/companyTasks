@@ -2,13 +2,16 @@ def agents  = ['win64', 'linux64', 'macos']
  
 def generateStage(nodeLabel) {
     return {
-        stage("Runs on ${nodeLabel}") {
+        stage("Unit tests on ${nodeLabel}") {
             node(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
                     // To-Do
                     sh "pytest -k test_unit --cov ./01_jenkins/sample_app --junitxml=pytest_unit_report_${nodeLabel}.html ./01_jenkins/sample_app"
+
+                    // Collect test results (JUnit XML, code coverage reports) and upload them to the "Ebury-ci-executions" S3 bucket.
+                    sh "aws s3 cp --endpoint-url http://$LOCALSTACK_URL --no-sign-request . s3://default/ --recursive --exclude '*' --include 'pytest_*'" 
                 }
             }
         }
@@ -23,6 +26,7 @@ pipeline {
     agent any
 
     stages {
+        // Fetch code from the GitHub repository
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
@@ -32,13 +36,20 @@ pipeline {
         // To-Do
         stage('Load credentials') {
             steps {
+
+                // Implement security best practices, such as using HashiCorp Vault for secret management.
                 // To-Do
+                sh 'curl -s http://localhost:8200/v1/secret/data/aws_credentials -H "X-Vault-Token: myroot" | jq ".data.data.AWS_ACCESS_KEY" > AWS_ACCESS_KEY.txt'
+                sh 'curl -s http://localhost:8200/v1/secret/data/aws_credentials -H "X-Vault-Token: myroot" | jq ".data.data.AWS_SECRET_ACCESS_KEY" > AWS_SECRET_ACCESS_KEY.txt'
                 script {
-                    env.AWS_ACCESS_KEY = sh 'curl http://localhost:8200/v1/secret/data/aws_credentials -H "X-Vault-Token: myroot" | jq ".data.data.AWS_ACCESS_KEY"'
-                    env.AWS_SECRET_ACCESS_KEY = sh 'curl http://localhost:8200/v1/secret/data/aws_credentials -H "X-Vault-Token: myroot" | jq ".data.data.AWS_SECRET_ACCESS_KEY"'
+                    env.AWS_ACCESS_KEY = readFile 'AWS_ACCESS_KEY.txt'
+                    env.AWS_SECRET_ACCESS_KEY = readFile 'AWS_SECRET_ACCESS_KEY.txt'
                 }
+                sh 'rm AWS_ACCESS_KEY.txt AWS_SECRET_ACCESS_KEY.txt'
             }
         } 
+        
+        // Execute unit tests using pytest and parallelize them across multiple agents.
         stage('Tests (Unit)') {
             steps {
                 script {
@@ -46,16 +57,22 @@ pipeline {
                 }
             }
         }
+
+        // Run integration tests against a staging environment.
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
                 // To-Do
                 sh "STAGING_URL=http://localhost:8080/login pytest -k test_integration --junitxml=pytest_integration_report.html" 
             }
         }
+
+        // Collect test results (JUnit XML, code coverage reports) and upload them to the "Ebury-ci-executions" S3 bucket.
         stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
+                // To-DO
                 sh "ls -l" 
                 sh "env" 
+                sh "aws s3 cp --endpoint-url http://$LOCALSTACK_URL --no-sign-request . s3://default/ --recursive --exclude '*' --include 'pytest_*'" 
             }
         }
     } 
