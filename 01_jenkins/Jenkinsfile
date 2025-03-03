@@ -7,6 +7,7 @@ def generateStage(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
+                    // To-Do
                     sh "pytest -k test_unit --cov ./01_jenkins/sample_app --junitxml=pytest_unit_report_${nodeLabel}.html ./01_jenkins/sample_app"
                 }
             }
@@ -28,6 +29,17 @@ pipeline {
                 sh "ls -lart ./*"
             }
         } 
+        // To-Do
+        stage('Load credentials') {
+            steps {
+                sh 'curl http://localhost:8200/v1/secret/data/aws_credentials > aws_credentials.json'
+                script {
+                    env.AWS_ACCESS_KEY = readJSON(text: "./aws_credentials.json").AWS_ACCESS_KEY
+                    env.AWS_SECRET_ACCESS_KEY = readJSON(text: "./aws_credentials.json").AWS_SECRET_ACCESS_KEY
+                }
+                sh 'rm aws_credentials.json'
+            }
+        } 
         stage('Tests (Unit)') {
             steps {
                 script {
@@ -37,23 +49,15 @@ pipeline {
         }
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
+                // To-Do
                 sh "STAGING_URL=http://localhost:8080/login pytest -k test_integration --junitxml=pytest_integration_report.html" 
             }
         }
         stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
                 sh "ls -l" 
+                sh "env" 
             }
         }
-    } // usa vault en algun momento
+    } 
 }
-
-
-// (
-//                         "Test (unit, group A)": { 
-//                             bat "pytest -k test_unit_a" 
-//                         },
-//                         "Test (unit, group B)": { 
-//                             bat "pytest -k test_unit_b" 
-//                         }
-//                 )
