@@ -37,7 +37,7 @@ pipeline {
         }
         stage('Tests (Integration)') { // https://plugins.jenkins.io/pipeline-aws/
             steps {
-                sh "STAGING_URL=https://localhost:9000 pytest -k test_integration --junitxml=pytest_integration_report.html" 
+                sh "STAGING_URL=https://localhost:8080 pytest -k test_integration --junitxml=pytest_integration_report.html" 
             }
         }
         stage('Upload artifacts') { // https://plugins.jenkins.io/pipeline-aws/
