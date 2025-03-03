@@ -6,7 +6,9 @@ def generateStage(nodeLabel) {
             node(nodeLabel) {
                script {
                     echo "Running on ${nodeLabel}"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-user-github', url: 'https://github.com/spokerman12/companyTasks.git']]])
                     sh "ls -lart ./*"
+                    sh "pwd"
                     sh "pytest -k test_unit --cov ./01_jenkins/sample_app --junitxml=pytest_integration_report_${nodeLabel}.html ./01_jenkins/sample_app"
                 }
             }
